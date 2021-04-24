@@ -70,10 +70,12 @@ import argparse
 
 parser = argparse.ArgumentParser(description='definir hiperparametros red neuronal')
 parser.add_argument('optimizer', type=str, help='Optimizer: adam,sgd,... ')
+parser.add_argument('nlayers', type=int, help='Number of layers used in the CNN: 0 for default, 1 for additional one')
 
 args = parser.parse_args()
 
 print("the optimizer used is : ",args.optimizer)
+print("the configuration for layers is : ",args.nlayers)
 
 
 # In[3]:
@@ -291,18 +293,36 @@ print(np.min(first_image), np.max(first_image))
 
 num_classes = 5
 
-model = Sequential([
-  layers.experimental.preprocessing.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
-  layers.Conv2D(16, 3, padding='same', activation='relu'),
-  layers.MaxPooling2D(),
-  layers.Conv2D(32, 3, padding='same', activation='relu'),
-  layers.MaxPooling2D(),
-  layers.Conv2D(64, 3, padding='same', activation='relu'),
-  layers.MaxPooling2D(),
-  layers.Flatten(),
-  layers.Dense(128, activation='relu'),
-  layers.Dense(num_classes)
-])
+if args.nlayers == 0:
+
+  model = Sequential([
+      layers.experimental.preprocessing.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
+      layers.Conv2D(16, 3, padding='same', activation='relu'),
+      layers.MaxPooling2D(),
+      layers.Conv2D(32, 3, padding='same', activation='relu'),
+      layers.MaxPooling2D(),
+      layers.Conv2D(64, 3, padding='same', activation='relu'),
+      layers.MaxPooling2D(),
+      layers.Flatten(),
+      layers.Dense(128, activation='relu'),
+      layers.Dense(num_classes)
+      ])
+else:
+
+  model = Sequential([
+      layers.experimental.preprocessing.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
+      layers.Conv2D(16, 3, padding='same', activation='relu'),
+      layers.MaxPooling2D(),
+      layers.Conv2D(32, 3, padding='same', activation='relu'),
+      layers.MaxPooling2D(),
+      layers.Conv2D(64, 3, padding='same', activation='relu'),
+      layers.MaxPooling2D(),
+      layers.Conv2D(128, 3, padding='same', activation='relu'),
+      layers.MaxPooling2D(),
+      layers.Flatten(),
+      layers.Dense(256, activation='relu'),
+      layers.Dense(num_classes)
+      ])
 
 
 # ## Compile the model
@@ -516,7 +536,7 @@ plt.plot(epochs_range, val_loss, label='Validation Loss')
 plt.legend(loc='upper right')
 plt.title('Training and Validation Loss')
 #plt.show()
-plt.savefig("graficos_"+args.optimizer+".png")
+plt.savefig("graficos_"+args.optimizer+"_layer_"+str(args.nlayers)+".png")
 
 
 # ## Predict on new data
@@ -546,4 +566,4 @@ print(
 )
 
 
-model.save("model_"+args.optimizer+".h5")
+model.save("model_"+args.optimizer+"_layer_"+str(args.nlayers)+".h5")
